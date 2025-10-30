@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GameOfLife" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="main.java.com.gameoflife.Simulation" />
+    <module name="GameOfLife" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
