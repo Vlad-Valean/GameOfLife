@@ -1,4 +1,3 @@
 package main.java.com.gameoflife.util;
 
-public class Position {
-}
+public record Position(int x, int y) {}
