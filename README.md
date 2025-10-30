@@ -47,7 +47,7 @@ src/main/java/com/gameoflife/
 │   └── Position.java       // Record or class for coordinates (x, y)
 │
 └── visualization/
-└── Visualizer.java     // (Optional) Runnable that displays the world state in the console
+    └── Visualizer.java     // (Optional) Runnable that displays the world state in the console
 ```
 
 ## How to Run
