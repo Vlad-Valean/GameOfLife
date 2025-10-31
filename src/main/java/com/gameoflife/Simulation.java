@@ -55,6 +55,26 @@ public class Simulation {
         Visualizer visualizer = new Visualizer(world);
         executor.submit(visualizer);
 
+        Runnable shutdownMonitor = () -> {
+            try {
+                Thread.sleep(10000);
+
+                while (world.getAliveCellCount() > 0) {
+                    Thread.sleep(Constants.MONITOR_THREAD_SLEEP_MS);
+                }
+
+                System.out.println("All cells are dead. Shutting down in 5 seconds...");
+                Thread.sleep(Constants.SHUTDOWN_DELAY_MS);
+
+                executor.shutdownNow();
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        };
+
+        executor.submit(shutdownMonitor);
+
         System.out.println("Simulation setup complete. Visualizer is running.");
     }
 }
