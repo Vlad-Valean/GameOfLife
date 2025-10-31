@@ -12,7 +12,7 @@ public abstract class BaseCell implements Cell {
     protected volatile boolean isAlive = true;
     protected State state = State.HUNGRY;
     protected int mealsEaten = 0;
-    protected long starveTimerStart = 0; // This line was changed from 'private'
+    protected long starveTimerStart = 0;
     protected final Random random = new Random();
 
     public BaseCell(World world, Position position) {
@@ -103,10 +103,11 @@ public abstract class BaseCell implements Cell {
         return isAlive;
     }
 
+    @Override
+        public void partnerFound() {}
+
     public abstract void reproduce();
 
     @Override
     public abstract char getDisplayChar();
 }
-
-

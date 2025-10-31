@@ -20,6 +20,9 @@ public class World {
     private final ConcurrentHashMap<Position, AtomicInteger> foodGrid;
     private final ConcurrentHashMap<Position, Cell> cellGrid;
 
+    private final Object partnerLock = new Object();
+    private Cell waitingPartner = null;
+
     public World(ExecutorService executor) {
         this.width = Constants.WORLD_WIDTH;
         this.height = Constants.WORLD_HEIGHT;
@@ -98,6 +101,19 @@ public class World {
             }
         }
         return null;
+    }
+
+    public Cell findPartner(Cell requester) {
+        synchronized (partnerLock) {
+            if (waitingPartner == null) {
+                waitingPartner = requester;
+                return null;
+            } else {
+                Cell partner = waitingPartner;
+                waitingPartner = null;
+                return partner;
+            }
+        }
     }
 
     private void clearConsole() {
