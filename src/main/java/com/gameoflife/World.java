@@ -23,6 +23,8 @@ public class World {
     private final Object partnerLock = new Object();
     private Cell waitingPartner = null;
 
+    public record WorldSnapshot(Map<Position, Cell> cells, Map<Position, AtomicInteger> food) {}
+
     public World(ExecutorService executor) {
         this.width = Constants.WORLD_WIDTH;
         this.height = Constants.WORLD_HEIGHT;
@@ -39,6 +41,16 @@ public class World {
 
     public int getHeight() {
         return height;
+    }
+
+    public int getAliveCellCount() {
+        return cellGrid.size();
+    }
+
+    public WorldSnapshot getSnapshots() {
+        Map<Position, Cell> cellSnapshot = new HashMap<>(this.cellGrid);
+        Map<Position, AtomicInteger> foodSnapshot = new HashMap<>(this.foodGrid);
+        return new WorldSnapshot(cellSnapshot, foodSnapshot);
     }
 
     public boolean tryConsumeFood(Position pos) {
@@ -114,51 +126,5 @@ public class World {
                 return partner;
             }
         }
-    }
-
-    private void clearConsole() {
-        for (int i = 0; i < 50; ++i) {
-            System.out.println();
-        }
-    }
-
-    public void printWorld() {
-        clearConsole();
-
-        Map<Position, AtomicInteger> foodSnapshot = new HashMap<>(this.foodGrid);
-        Map<Position, Cell> cellSnapshot = new HashMap<>(this.cellGrid);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Game of Life Simulation\n");
-
-        sb.append("=".repeat(width + 2)).append("\n");
-
-        for (int y = 0; y < height; y++) {
-            sb.append("|");
-            for (int x = 0; x < width; x++) {
-                Position currentPos = new Position(x, y);
-
-                Cell cell = cellSnapshot.get(currentPos);
-                AtomicInteger foodCount = foodSnapshot.get(currentPos);
-
-                if (cell != null) {
-                    sb.append(cell.getDisplayChar());
-                } else if (foodCount != null && foodCount.get() > 0) {
-                    sb.append('*');
-                } else {
-                    sb.append(' ');
-                }
-            }
-            sb.append("|\n");
-        }
-
-        sb.append("=".repeat(width + 2)).append("\n");
-
-        int totalFood = foodSnapshot.values().stream().mapToInt(AtomicInteger::get).sum();
-        int totalCells = cellSnapshot.size();
-        sb.append("Cells: ").append(totalCells).append(" | Food: ").append(totalFood).append("\n");
-
-        System.out.print(sb.toString());
-        System.out.flush();
     }
 }
