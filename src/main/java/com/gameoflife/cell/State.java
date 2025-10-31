@@ -1,4 +1,8 @@
 package main.java.com.gameoflife.cell;
 
-public class State {
+public enum State {
+    IDLE,
+    HUNGRY,
+    STARVING,
+    REPRODUCING
 }
