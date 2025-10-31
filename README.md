@@ -4,14 +4,14 @@ This is Project 1, a concurrent application in Java that simulates a custom "Gam
 
 ## Description
 
-Each cell in the simulation is a thread (`Runnable`) that manages its own life cycle:
+Each main.java.com.gameoflife.cell in the simulation is a thread (`Runnable`) that manages its own life cycle:
 
 * **Feeding:** Cells must consume food units to survive.
-* **Survival:** A cell that eats is "full" for a time (`T_FULL`). After that, it becomes hungry. If it doesn't eat within a given time (`T_STARVE`), it dies.
-* **Death:** When a cell dies, it leaves behind a small amount of food.
-* **Reproduction:** After eating a minimum number of times, a cell attempts to reproduce.
+* **Survival:** A main.java.com.gameoflife.cell that eats is "full" for a time (`T_FULL`). After that, it becomes hungry. If it doesn't eat within a given time (`T_STARVE`), it dies.
+* **Death:** When a main.java.com.gameoflife.cell dies, it leaves behind a small amount of food.
+* **Reproduction:** After eating a minimum number of times, a main.java.com.gameoflife.cell attempts to reproduce.
     * **Asexual:** It divides into two new cells.
-    * **Sexual:** It must find another sexual cell that is also looking to reproduce.
+    * **Sexual:** It must find another sexual main.java.com.gameoflife.cell that is also looking to reproduce.
 
 The main objective of the project is to correctly manage concurrency and access to shared state (the world map, food) using Java synchronization mechanisms.
 
@@ -19,10 +19,10 @@ The main objective of the project is to correctly manage concurrency and access 
 
 * **Language:** Java (JDK 11+)
 * **Core Concurrency:**
-    * `java.lang.Runnable` and `java.lang.Thread`: Each cell is a thread.
+    * `java.lang.Runnable` and `java.lang.Thread`: Each main.java.com.gameoflife.cell is a thread.
     * `java.util.concurrent.ExecutorService`: For efficiently managing the thread pool (cells).
 * **Thread-Safe Data Structures:**
-    * `java.util.concurrent.ConcurrentHashMap`: Used to store the world state (cell and food positions) to allow atomic access and prevent `ConcurrentModificationException`.
+    * `java.util.concurrent.ConcurrentHashMap`: Used to store the world state (main.java.com.gameoflife.cell and food positions) to allow atomic access and prevent `ConcurrentModificationException`.
 * **Synchronization:**
     * `synchronized` (Monitor Pattern): Used to manage coordination logic, such as the mating of sexual cells.
     * `volatile`: Used for flags (e.g., `isAlive`) accessed by multiple threads.
@@ -36,7 +36,7 @@ src/main/java/com/gameoflife/
 ├── World.java              // Monitor class (Singleton), manages shared state
 ├── Constants.java          // Simulation constants (T\_FULL, T\_STARVE, etc.)
 │
-├── cell/
+├── main.java.com.gameoflife.cell/
 │   ├── Cell.java           // Interface (Runnable)
 │   ├── State.java          // Enum (IDLE, HUNGRY, STARVING, REPRODUCING)
 │   ├── BaseCell.java       // Abstract class with basic logic (life, death)
@@ -56,7 +56,7 @@ src/main/java/com/gameoflife/
 
 1.  **Compile:**
     ```bash
-    javac -d out src/main/java/com/gameoflife/*.java src/main/java/com/gameoflife/cell/*.java src/main/java/com/gameoflife/util/*.java src/main/java/com/gameoflife/visualization/*.java
+    javac -d out src/main/java/com/gameoflife/*.java src/main/java/com/gameoflife/main.java.com.gameoflife.cell/*.java src/main/java/com/gameoflife/util/*.java src/main/java/com/gameoflife/visualization/*.java
     ```
 
 2.  **Run:**
