@@ -29,4 +29,10 @@ public record Position(int x, int y) {
         int newY = (this.y + dy + height) % height;
         return new Position(newX, newY);
     }
+
+    public double distanceTo(Position other) {
+        long dx = this.x - other.x();
+        long dy = this.y - other.y();
+        return Math.hypot(dx, dy);
+    }
 }

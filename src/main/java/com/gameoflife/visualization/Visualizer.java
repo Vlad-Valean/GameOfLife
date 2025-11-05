@@ -46,7 +46,7 @@ public class Visualizer implements Runnable {
                 terminal.clearScreen();
 
                 drawBorders();
-                putString(0, 0, "Game of Life (Lanterna)");
+                putString(0, 0, "Game of Life");
 
                 terminal.setForegroundColor(TextColor.Factory.fromString("#E6DB74"));
                 for (Map.Entry<Position, AtomicInteger> entry : food.entrySet()) {
