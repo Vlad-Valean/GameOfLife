@@ -13,14 +13,14 @@ import java.util.Random;
 public class Simulation {
 
     public static void main(String[] args) {
-        System.out.println("Simulation is starting...");
+        System.out.println(Constants.SIMULATION_STARTING_MESSAGE);
 
         ExecutorService executor = Executors.newCachedThreadPool();
 
         World world = new World(executor);
 
         Random random = new Random();
-        System.out.println("Spawning " + Constants.INITIAL_FOOD_UNITS + " units of food...");
+        System.out.println(Constants.INITIAL_FOOD_UNITS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_FOOD_UNITS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -29,7 +29,7 @@ public class Simulation {
             world.spawnFood(pos, 1);
         }
 
-        System.out.println("Spawning " + Constants.INITIAL_ASEXUAL_CELLS + " asexual cells...");
+        System.out.println(Constants.INITIAL_ASEXUAL_CELLS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_ASEXUAL_CELLS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -40,7 +40,7 @@ public class Simulation {
             executor.submit(cell);
         }
 
-        System.out.println("Spawning " + Constants.INITIAL_SEXUAL_CELLS + " sexual cells...");
+        System.out.println(Constants.INITIAL_SEXUAL_CELLS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_SEXUAL_CELLS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -63,7 +63,7 @@ public class Simulation {
                     Thread.sleep(Constants.MONITOR_THREAD_SLEEP_MS);
                 }
 
-                System.out.println("All cells are dead. Shutting down in 5 seconds...");
+                System.out.println(Constants.SIMULATION_ENDING_MESSAGE);
                 Thread.sleep(Constants.SHUTDOWN_DELAY_MS);
 
                 executor.shutdownNow();
@@ -75,6 +75,6 @@ public class Simulation {
 
         executor.submit(shutdownMonitor);
 
-        System.out.println("Simulation setup complete. Visualizer is running.");
+        System.out.println(Constants.SETUP_COMPLETE_MESSAGE);
     }
 }

@@ -3,27 +3,31 @@ package main.java.com.gameoflife.cell;
 import main.java.com.gameoflife.Constants;
 import main.java.com.gameoflife.World;
 import main.java.com.gameoflife.util.Position;
-import java.util.Random;
-import java.util.Collections;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public abstract class BaseCell implements Cell {
 
     protected final World world;
     protected Position position;
+    protected State state = State.HUNGRY;
     protected volatile boolean isAlive = true;
     protected volatile boolean partnerFoundFlag = false;
-    protected State state = State.HUNGRY;
     protected int mealsEaten = 0;
     protected long starveTimerStart = 0;
     protected final Random random = new Random();
+
 
     public BaseCell(World world, Position position) {
         this.world = world;
         this.position = position;
         this.starveTimerStart = System.currentTimeMillis();
     }
+
+
 
     @Override
     public void run() {
@@ -51,6 +55,9 @@ public abstract class BaseCell implements Cell {
         }
     }
 
+
+
+
     private void idle() throws InterruptedException {
         Thread.sleep(Constants.T_FULL);
 
@@ -62,10 +69,7 @@ public abstract class BaseCell implements Cell {
         }
     }
 
-    @Override
-    public boolean isAlive() {
-        return isAlive;
-    }
+
 
     private void findFood(boolean isStarving) {
         if (isStarving) {
@@ -86,28 +90,16 @@ public abstract class BaseCell implements Cell {
         }
     }
 
+
+
+    public abstract void reproduce() throws InterruptedException;
+
     @Override
-    public void moveToRandomAdjacent() {
-        List<Position> possibleMoves = new ArrayList<>(8);
+    public abstract char getDisplayChar();
 
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                if (dx == 0 && dy == 0) continue;
-                possibleMoves.add(this.position.getAdjacent(dx, dy, world.getWidth(), world.getHeight()));
-            }
-        }
 
-        Collections.shuffle(possibleMoves, this.random);
 
-        for (Position newPos : possibleMoves) {
-            if (world.tryMoveCell(this, this.position, newPos)) {
-                this.position = newPos;
-                return;
-            }
-        }
-    }
-
-    protected void moveToTarget(Position target) {
+    public void moveToTarget(Position target) {
         if (target == null) {
             moveToRandomAdjacent();
             return;
@@ -126,6 +118,25 @@ public abstract class BaseCell implements Cell {
         }
     }
 
+    public void moveToRandomAdjacent() {
+        List<Position> possibleMoves = new ArrayList<>(8);
+
+        for (int[] delta : Constants.ADJACENT_DELTAS) {
+            possibleMoves.add(this.position.getAdjacent(delta[0], delta[1], world.getWidth(), world.getHeight()));
+        }
+
+        Collections.shuffle(possibleMoves, this.random);
+
+        for (Position newPos : possibleMoves) {
+            if (world.tryMoveCell(this, this.position, newPos)) {
+                this.position = newPos;
+                return;
+            }
+        }
+    }
+
+
+
     protected void die() {
         this.isAlive = false;
         world.unregisterCell(this, position);
@@ -133,6 +144,13 @@ public abstract class BaseCell implements Cell {
                 Constants.FOOD_DROPPED_ON_DEATH_MAX - Constants.FOOD_DROPPED_ON_DEATH_MIN + 1)
                 + Constants.FOOD_DROPPED_ON_DEATH_MIN;
         world.spawnFood(position, foodDropped);
+    }
+
+
+
+    @Override
+    public boolean isAlive() {
+        return isAlive;
     }
 
     @Override
@@ -149,9 +167,4 @@ public abstract class BaseCell implements Cell {
     public void partnerFound() {
         this.partnerFoundFlag = true;
     }
-
-    public abstract void reproduce() throws InterruptedException;
-
-    @Override
-    public abstract char getDisplayChar();
 }

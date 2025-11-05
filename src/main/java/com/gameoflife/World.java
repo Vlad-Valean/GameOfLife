@@ -22,9 +22,6 @@ public class World {
     private final ConcurrentHashMap<Position, Cell> cellGrid;
     private final ConcurrentHashMap<Position, Cell> waitingGrid;
 
-    private final Object partnerLock = new Object();
-    private Cell waitingPartner = null;
-
     public record WorldSnapshot(Map<Position, Cell> cells, Map<Position, AtomicInteger> food) {}
 
     public World(ExecutorService executor) {
@@ -35,7 +32,7 @@ public class World {
         this.waitingGrid = new ConcurrentHashMap<>();
         this.executor = executor;
 
-        System.out.println("World class created with size " + this.width + "x" + this.height);
+        System.out.println(Constants.WORLD_CREATED_MESSAGE);
     }
 
     public int getWidth() {

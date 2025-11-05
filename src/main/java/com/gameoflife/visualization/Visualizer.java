@@ -46,9 +46,9 @@ public class Visualizer implements Runnable {
                 terminal.clearScreen();
 
                 drawBorders();
-                putString(0, 0, "Game of Life");
+                putString(0, 0, Constants.GAME_TITLE);
 
-                terminal.setForegroundColor(TextColor.Factory.fromString("#E6DB74"));
+                terminal.setForegroundColor(TextColor.ANSI.YELLOW);
                 for (Map.Entry<Position, AtomicInteger> entry : food.entrySet()) {
                     if (entry.getValue().get() > 0) {
                         Position pos = entry.getKey();
@@ -62,11 +62,11 @@ public class Visualizer implements Runnable {
                     char displayChar = entry.getValue().getDisplayChar();
 
                     switch (displayChar) {
-                        case 'A': terminal.setForegroundColor(TextColor.Factory.fromString("#A6E22E")); break;
-                        case 'a': terminal.setForegroundColor(TextColor.Factory.fromString("#F92672")); break;
-                        case 'S': terminal.setForegroundColor(TextColor.Factory.fromString("#66D9EF")); break;
-                        case 's': terminal.setForegroundColor(TextColor.Factory.fromString("#FD971F")); break;
-                        case 'R': terminal.setForegroundColor(TextColor.Factory.fromString("#AE81FF")); break;
+                        case 'A': terminal.setForegroundColor(TextColor.ANSI.GREEN_BRIGHT); break;
+                        case 'a': terminal.setForegroundColor(TextColor.ANSI.RED_BRIGHT); break;
+                        case 'S': terminal.setForegroundColor(TextColor.ANSI.CYAN_BRIGHT); break;
+                        case 's': terminal.setForegroundColor(TextColor.ANSI.YELLOW_BRIGHT); break;
+                        case 'R': terminal.setForegroundColor(TextColor.ANSI.MAGENTA_BRIGHT); break;
                         default: terminal.setForegroundColor(TextColor.ANSI.WHITE);
                     }
 

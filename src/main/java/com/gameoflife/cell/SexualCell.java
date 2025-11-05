@@ -20,16 +20,12 @@ public class SexualCell extends BaseCell {
             if (partner != null) {
                 foundPartner = true;
                 spawnChild(partner);
-            } else {
-                if (world.registerWaiter(this)) {
-                    synchronized (this) {
-                        wait(Constants.T_PARTNER_SEARCH_MS);
-                    }
-                    if (this.partnerFoundFlag) {
-                        foundPartner = true;
-                    }
-                    world.removeWaiter(this);
+            } else if (world.registerWaiter(this)) {
+                synchronized (this) {
+                    wait(Constants.T_PARTNER_SEARCH_MS);
                 }
+                foundPartner = this.partnerFoundFlag;
+                world.removeWaiter(this);
             }
         } finally {
             if (foundPartner) {
@@ -58,16 +54,12 @@ public class SexualCell extends BaseCell {
 
     @Override
     public char getDisplayChar() {
-        switch (this.state) {
-            case IDLE:
-                return 'S';
-            case REPRODUCING:
-                return 'R';
-            case HUNGRY:
-            case STARVING:
-                return 's';
-            default:
-                return '?';
-        }
+        return switch (this.state) {
+            case IDLE -> Constants.DISPLAY_CELLS.SEXUAL.IDLE();
+            case REPRODUCING -> Constants.DISPLAY_CELLS.SEXUAL.REPRODUCING();
+            case HUNGRY -> Constants.DISPLAY_CELLS.SEXUAL.HUNGRY();
+            case STARVING -> Constants.DISPLAY_CELLS.SEXUAL.STARVING();
+            default -> Constants.DISPLAY_CELLS.UNKNOWN;
+        };
     }
 }
