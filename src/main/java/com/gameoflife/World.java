@@ -1,6 +1,7 @@
 package main.java.com.gameoflife;
 
 import main.java.com.gameoflife.cell.Cell;
+import main.java.com.gameoflife.cell.State;
 import main.java.com.gameoflife.util.Position;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class World {
 
     private final ConcurrentHashMap<Position, AtomicInteger> foodGrid;
     private final ConcurrentHashMap<Position, Cell> cellGrid;
+    private final ConcurrentHashMap<Position, Cell> waitingGrid;
 
     private final Object partnerLock = new Object();
     private Cell waitingPartner = null;
@@ -30,6 +32,7 @@ public class World {
         this.height = Constants.WORLD_HEIGHT;
         this.foodGrid = new ConcurrentHashMap<>();
         this.cellGrid = new ConcurrentHashMap<>();
+        this.waitingGrid = new ConcurrentHashMap<>();
         this.executor = executor;
 
         System.out.println("World class created with size " + this.width + "x" + this.height);
@@ -72,18 +75,14 @@ public class World {
         foodGrid.computeIfAbsent(pos, k -> new AtomicInteger(0)).addAndGet(quantity);
     }
 
-    public void registerCell(Cell cell, Position pos) {
-        cellGrid.put(pos, cell);
+    public boolean registerCell(Cell cell, Position pos) {
+        return cellGrid.putIfAbsent(pos, cell) == null;
     }
-
     public void unregisterCell(Cell cell, Position pos) {
         cellGrid.remove(pos, cell);
     }
 
     public boolean tryMoveCell(Cell cell, Position oldPos, Position newPos) {
-        if (cellGrid.containsKey(newPos)) {
-            return false;
-        }
         if (cellGrid.putIfAbsent(newPos, cell) == null) {
             unregisterCell(cell, oldPos);
             return true;
@@ -91,9 +90,41 @@ public class World {
         return false;
     }
 
-    public void startChildCell(Cell cell) {
-        registerCell(cell, cell.getPosition());
-        executor.submit(cell);
+    public Cell findAndPartnerAdjacent(Cell requester) {
+        Position pos = requester.getPosition();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) continue;
+                Position neighborPos = pos.getAdjacent(dx, dy, width, height);
+                Cell potentialPartner = waitingGrid.get(neighborPos);
+                if (potentialPartner != null &&
+                        potentialPartner.isAlive() &&
+                        potentialPartner.getState() == State.REPRODUCING) {
+                    if (waitingGrid.remove(neighborPos, potentialPartner)) {
+                        potentialPartner.partnerFound();
+                        synchronized (potentialPartner) {
+                            potentialPartner.notifyAll();
+                        }
+                        return potentialPartner;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean registerWaiter(Cell cell) {
+        return waitingGrid.putIfAbsent(cell.getPosition(), cell) == null;
+    }
+
+    public void removeWaiter(Cell cell) {
+        waitingGrid.remove(cell.getPosition(), cell);
+    }
+
+    public boolean startChildCell(Cell cell) {
+        boolean result = registerCell(cell, cell.getPosition());
+        if(result) executor.submit(cell);
+        return result;
     }
 
     public Position findEmptyAdjacent(Position pos) {
@@ -115,16 +146,21 @@ public class World {
         return null;
     }
 
-    public Cell findPartner(Cell requester) {
-        synchronized (partnerLock) {
-            if (waitingPartner == null) {
-                waitingPartner = requester;
-                return null;
-            } else {
-                Cell partner = waitingPartner;
-                waitingPartner = null;
-                return partner;
+    public Cell findNearestWaiter(Position pos) {
+        Cell nearest = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (Cell waiter : waitingGrid.values()) {
+            if (waiter.getPosition().equals(pos)) {
+                continue;
+            }
+
+            double distance = pos.distanceTo(waiter.getPosition());
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = waiter;
             }
         }
+        return nearest;
     }
 }

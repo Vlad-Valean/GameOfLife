@@ -4,12 +4,16 @@ import main.java.com.gameoflife.Constants;
 import main.java.com.gameoflife.World;
 import main.java.com.gameoflife.util.Position;
 import java.util.Random;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseCell implements Cell {
 
     protected final World world;
     protected Position position;
     protected volatile boolean isAlive = true;
+    protected volatile boolean partnerFoundFlag = false;
     protected State state = State.HUNGRY;
     protected int mealsEaten = 0;
     protected long starveTimerStart = 0;
@@ -58,6 +62,11 @@ public abstract class BaseCell implements Cell {
         }
     }
 
+    @Override
+    public boolean isAlive() {
+        return isAlive;
+    }
+
     private void findFood(boolean isStarving) {
         if (isStarving) {
             long timeElapsed = System.currentTimeMillis() - this.starveTimerStart;
@@ -77,10 +86,43 @@ public abstract class BaseCell implements Cell {
         }
     }
 
-    private void moveToRandomAdjacent() {
-        Position newPos = position.getAdjacent(world.getWidth(), world.getHeight());
-        if (world.tryMoveCell(this, position, newPos)) {
+    @Override
+    public void moveToRandomAdjacent() {
+        List<Position> possibleMoves = new ArrayList<>(8);
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) continue;
+                possibleMoves.add(this.position.getAdjacent(dx, dy, world.getWidth(), world.getHeight()));
+            }
+        }
+
+        Collections.shuffle(possibleMoves, this.random);
+
+        for (Position newPos : possibleMoves) {
+            if (world.tryMoveCell(this, this.position, newPos)) {
+                this.position = newPos;
+                return;
+            }
+        }
+    }
+
+    protected void moveToTarget(Position target) {
+        if (target == null) {
+            moveToRandomAdjacent();
+            return;
+        }
+        int dx = Integer.compare(target.x(), this.position.x());
+        int dy = Integer.compare(target.y(), this.position.y());
+        if (dx == 0 && dy == 0) {
+            moveToRandomAdjacent();
+            return;
+        }
+        Position newPos = this.position.getAdjacent(dx, dy, world.getWidth(), world.getHeight());
+        if (world.tryMoveCell(this, this.position, newPos)) {
             this.position = newPos;
+        } else {
+            moveToRandomAdjacent();
         }
     }
 
@@ -99,14 +141,16 @@ public abstract class BaseCell implements Cell {
     }
 
     @Override
-    public boolean isAlive() {
-        return isAlive;
+    public State getState() {
+        return this.state;
     }
 
     @Override
-        public void partnerFound() {}
+    public void partnerFound() {
+        this.partnerFoundFlag = true;
+    }
 
-    public abstract void reproduce();
+    public abstract void reproduce() throws InterruptedException;
 
     @Override
     public abstract char getDisplayChar();
