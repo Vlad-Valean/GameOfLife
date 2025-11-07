@@ -19,38 +19,44 @@ public class SexualCell extends BaseCell {
     public void reproduce() throws InterruptedException {
         this.state = State.REPRODUCING;
         this.partnerFoundFlag = false;
-        boolean foundPartner = false;
-        try {
-            Cell partner = world.findAndPartnerAdjacent(this);
-            if (partner != null) {
-                log.info("{} mated with {} at {}.", this, partner, position);
-                foundPartner = true;
-                spawnChild(partner);
-            } else if (world.registerWaiter(this)) {
-                log.debug("{} is waiting for a partner.", this);
-                synchronized (this) {
+
+        Cell partner = world.findAndPartnerAdjacent(this);
+
+        if (partner != null) {
+            log.info("{} mated with {} at {}.", this, partner, position);
+            spawnChild(partner);
+            this.mealsEaten = 0;
+            this.state = State.HUNGRY;
+            this.starveTimerStart = System.currentTimeMillis();
+
+        } else if (world.registerWaiter(this)) {
+            boolean foundPartnerWhileWaiting;
+
+            synchronized (this) {
+                if (!this.partnerFoundFlag) {
+                    log.debug("{} is waiting for a partner.", this);
                     wait(Constants.T_PARTNER_SEARCH_MS);
                 }
-                foundPartner = this.partnerFoundFlag;
-                if (foundPartner) {
-                    log.debug("{} was found by a partner while waiting.", this);
-                } else {
-                    log.debug("{} finished waiting, no partner found.", this);
-                }
-                world.removeWaiter(this);
+                foundPartnerWhileWaiting = this.partnerFoundFlag;
             }
-        } finally {
-            if (foundPartner) {
+
+            world.removeWaiter(this);
+
+            if (foundPartnerWhileWaiting) {
+                log.debug("{} was found by a partner while waiting.", this);
                 this.mealsEaten = 0;
                 this.state = State.HUNGRY;
                 this.starveTimerStart = System.currentTimeMillis();
             } else {
+                log.debug("{} finished waiting, no partner found.", this);
                 Cell targetCell = world.findNearestWaiter(this.position);
                 Position targetPos = (targetCell != null) ? targetCell.getPosition() : null;
                 log.debug("{} found no partner, moving towards {}.", this, targetPos);
                 moveToTarget(targetPos);
             }
-            this.partnerFoundFlag = false;
+        } else {
+            log.debug("{} failed to register as waiter, moving randomly.", this);
+            moveToRandomAdjacent();
         }
     }
 
