@@ -29,5 +29,16 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-target
-out
+### Java/Maven ###
+/target/
+*.log
+*.jar
+*.war
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+
+### Operating System files ###
+Thumbs.db
