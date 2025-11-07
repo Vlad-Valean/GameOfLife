@@ -1,8 +1,11 @@
-package main.java.com.gameoflife;
+package com.gameoflife;
 
-import main.java.com.gameoflife.cell.Cell;
-import main.java.com.gameoflife.cell.State;
-import main.java.com.gameoflife.util.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gameoflife.cell.Cell;
+import com.gameoflife.cell.State;
+import com.gameoflife.util.Position;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class World {
 
+    private static final Logger log = LoggerFactory.getLogger(World.class);
+
     private final int width;
     private final int height;
     private final Random random = new Random();
@@ -21,9 +26,6 @@ public class World {
     private final ConcurrentHashMap<Position, AtomicInteger> foodGrid;
     private final ConcurrentHashMap<Position, Cell> cellGrid;
     private final ConcurrentHashMap<Position, Cell> waitingGrid;
-
-    private final Object partnerLock = new Object();
-    private Cell waitingPartner = null;
 
     public record WorldSnapshot(Map<Position, Cell> cells, Map<Position, AtomicInteger> food) {}
 
@@ -35,7 +37,7 @@ public class World {
         this.waitingGrid = new ConcurrentHashMap<>();
         this.executor = executor;
 
-        System.out.println("World class created with size " + this.width + "x" + this.height);
+        log.info(Constants.WORLD_CREATED_MESSAGE);
     }
 
     public int getWidth() {

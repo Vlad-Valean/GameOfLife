@@ -1,10 +1,15 @@
-package main.java.com.gameoflife.cell;
+package com.gameoflife.cell;
 
-import main.java.com.gameoflife.Constants;
-import main.java.com.gameoflife.World;
-import main.java.com.gameoflife.util.Position;
+import com.gameoflife.Constants;
+import com.gameoflife.World;
+import com.gameoflife.util.Position;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SexualCell extends BaseCell {
+
+    private static final Logger log = LoggerFactory.getLogger(SexualCell.class);
 
     public SexualCell(World world, Position position) {
         super(world, position);
@@ -14,34 +19,44 @@ public class SexualCell extends BaseCell {
     public void reproduce() throws InterruptedException {
         this.state = State.REPRODUCING;
         this.partnerFoundFlag = false;
-        boolean foundPartner = false;
-        try {
-            Cell partner = world.findAndPartnerAdjacent(this);
-            if (partner != null) {
-                foundPartner = true;
-                spawnChild(partner);
-            } else {
-                if (world.registerWaiter(this)) {
-                    synchronized (this) {
-                        wait(Constants.T_PARTNER_SEARCH_MS);
-                    }
-                    if (this.partnerFoundFlag) {
-                        foundPartner = true;
-                    }
-                    world.removeWaiter(this);
+
+        Cell partner = world.findAndPartnerAdjacent(this);
+
+        if (partner != null) {
+            log.info("{} mated with {} at {}.", this, partner, position);
+            spawnChild(partner);
+            this.mealsEaten = 0;
+            this.state = State.HUNGRY;
+            this.starveTimerStart = System.currentTimeMillis();
+
+        } else if (world.registerWaiter(this)) {
+            boolean foundPartnerWhileWaiting;
+
+            synchronized (this) {
+                if (!this.partnerFoundFlag) {
+                    log.debug("{} is waiting for a partner.", this);
+                    wait(Constants.T_PARTNER_SEARCH_MS);
                 }
+                foundPartnerWhileWaiting = this.partnerFoundFlag;
             }
-        } finally {
-            if (foundPartner) {
+
+            world.removeWaiter(this);
+
+            if (foundPartnerWhileWaiting) {
+                log.debug("{} was found by a partner while waiting.", this);
                 this.mealsEaten = 0;
                 this.state = State.HUNGRY;
                 this.starveTimerStart = System.currentTimeMillis();
             } else {
+                log.debug("{} finished waiting, no partner found.", this);
                 Cell targetCell = world.findNearestWaiter(this.position);
                 Position targetPos = (targetCell != null) ? targetCell.getPosition() : null;
+                log.debug("{} found no partner, moving towards {}.", this, targetPos);
                 moveToTarget(targetPos);
             }
-            this.partnerFoundFlag = false;
+        } else {
+            log.debug("{} failed to register as waiter, moving randomly.", this);
+            moveToRandomAdjacent();
         }
     }
 
@@ -51,23 +66,22 @@ public class SexualCell extends BaseCell {
             childPos = world.findEmptyAdjacent(partner.getPosition());
         }
         if (childPos != null) {
+            log.info("{} and {} spawning a child at {}.", this, partner, childPos);
             Cell child = new SexualCell(world, childPos);
             world.startChildCell(child);
+        } else {
+            log.warn("{} and {} failed to spawn child, no empty adjacent space.", this, partner);
         }
     }
 
     @Override
     public char getDisplayChar() {
-        switch (this.state) {
-            case IDLE:
-                return 'S';
-            case REPRODUCING:
-                return 'R';
-            case HUNGRY:
-            case STARVING:
-                return 's';
-            default:
-                return '?';
-        }
+        return switch (this.state) {
+            case IDLE -> Constants.DISPLAY_CELLS.SEXUAL.IDLE();
+            case REPRODUCING -> Constants.DISPLAY_CELLS.SEXUAL.REPRODUCING();
+            case HUNGRY -> Constants.DISPLAY_CELLS.SEXUAL.HUNGRY();
+            case STARVING -> Constants.DISPLAY_CELLS.SEXUAL.STARVING();
+            default -> Constants.DISPLAY_CELLS.UNKNOWN;
+        };
     }
 }

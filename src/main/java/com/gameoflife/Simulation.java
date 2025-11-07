@@ -1,9 +1,12 @@
-package main.java.com.gameoflife;
+package com.gameoflife;
 
-import main.java.com.gameoflife.cell.AsexualCell;
-import main.java.com.gameoflife.cell.SexualCell;
-import main.java.com.gameoflife.visualization.Visualizer;
-import main.java.com.gameoflife.util.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gameoflife.cell.AsexualCell;
+import com.gameoflife.cell.SexualCell;
+import com.gameoflife.visualization.Visualizer;
+import com.gameoflife.util.Position;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,15 +15,17 @@ import java.util.Random;
 
 public class Simulation {
 
+    private static final Logger log = LoggerFactory.getLogger(Simulation.class);
+
     public static void main(String[] args) {
-        System.out.println("Simulation is starting...");
+        log.info(Constants.SIMULATION_STARTING_MESSAGE);
 
         ExecutorService executor = Executors.newCachedThreadPool();
 
         World world = new World(executor);
 
         Random random = new Random();
-        System.out.println("Spawning " + Constants.INITIAL_FOOD_UNITS + " units of food...");
+        log.info(Constants.INITIAL_FOOD_UNITS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_FOOD_UNITS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -29,7 +34,7 @@ public class Simulation {
             world.spawnFood(pos, 1);
         }
 
-        System.out.println("Spawning " + Constants.INITIAL_ASEXUAL_CELLS + " asexual cells...");
+        log.info(Constants.INITIAL_ASEXUAL_CELLS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_ASEXUAL_CELLS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -40,7 +45,7 @@ public class Simulation {
             executor.submit(cell);
         }
 
-        System.out.println("Spawning " + Constants.INITIAL_SEXUAL_CELLS + " sexual cells...");
+        log.info(Constants.INITIAL_SEXUAL_CELLS_MESSAGE);
         for (int i = 0; i < Constants.INITIAL_SEXUAL_CELLS; i++) {
             int x = random.nextInt(world.getWidth());
             int y = random.nextInt(world.getHeight());
@@ -63,18 +68,19 @@ public class Simulation {
                     Thread.sleep(Constants.MONITOR_THREAD_SLEEP_MS);
                 }
 
-                System.out.println("All cells are dead. Shutting down in 5 seconds...");
+                log.info(Constants.SIMULATION_ENDING_MESSAGE);
                 Thread.sleep(Constants.SHUTDOWN_DELAY_MS);
 
                 executor.shutdownNow();
 
             } catch (InterruptedException e) {
+                log.warn("Shutdown monitor interrupted.", e);
                 Thread.currentThread().interrupt();
             }
         };
 
         executor.submit(shutdownMonitor);
 
-        System.out.println("Simulation setup complete. Visualizer is running.");
+        log.info(Constants.SETUP_COMPLETE_MESSAGE);
     }
 }
