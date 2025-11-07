@@ -1,4 +1,4 @@
-package main.java.com.gameoflife.cell;
+package com.gameoflife.cell;
 
 public enum State {
     IDLE,

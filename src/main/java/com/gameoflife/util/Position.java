@@ -1,4 +1,4 @@
-package main.java.com.gameoflife.util;
+package com.gameoflife.util;
 
 public record Position(int x, int y) {
 

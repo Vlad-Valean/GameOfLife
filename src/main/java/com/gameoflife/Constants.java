@@ -1,4 +1,4 @@
-package main.java.com.gameoflife;
+package com.gameoflife;
 
 public final class Constants {
 

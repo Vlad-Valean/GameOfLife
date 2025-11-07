@@ -33,7 +33,8 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.13</version>
-            <scope>runtime</scope> </dependency>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -60,7 +61,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <mainClass>main.java.com.gameoflife.Simulation</mainClass>
+                    <mainClass>com.gameoflife.Simulation</mainClass>
                 </configuration>
             </plugin>
 

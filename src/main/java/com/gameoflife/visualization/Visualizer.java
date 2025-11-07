@@ -1,13 +1,13 @@
-package main.java.com.gameoflife.visualization;
+package com.gameoflife.visualization;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import main.java.com.gameoflife.Constants;
-import main.java.com.gameoflife.World;
-import main.java.com.gameoflife.cell.Cell;
-import main.java.com.gameoflife.util.Position;
+import com.gameoflife.Constants;
+import com.gameoflife.World;
+import com.gameoflife.cell.Cell;
+import com.gameoflife.util.Position;
 
 import java.io.IOException;
 import java.util.Map;

@@ -1,8 +1,11 @@
-package main.java.com.gameoflife;
+package com.gameoflife;
 
-import main.java.com.gameoflife.cell.Cell;
-import main.java.com.gameoflife.cell.State;
-import main.java.com.gameoflife.util.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gameoflife.cell.Cell;
+import com.gameoflife.cell.State;
+import com.gameoflife.util.Position;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class World {
+
+    private static final Logger log = LoggerFactory.getLogger(World.class);
 
     private final int width;
     private final int height;
@@ -32,7 +37,7 @@ public class World {
         this.waitingGrid = new ConcurrentHashMap<>();
         this.executor = executor;
 
-        System.out.println(Constants.WORLD_CREATED_MESSAGE);
+        log.info(Constants.WORLD_CREATED_MESSAGE);
     }
 
     public int getWidth() {
